@@ -2,12 +2,13 @@ setwd("C:/Users/Zouzi Qi/Desktop/Capstone Team 1")
 
 rm(list=ls())
 #install.packages("readxl")
-library(readxl)
 library(tidyverse)
 library(randomForest)
 library(tidyr)
-#library(ranger)
-cate_gpa <- read.csv("dei_survey_Final_v1.csv",na.strings = c(" ","","I donât know","0"))   #这边会有一个G_outcome =0.5的问题！！！！
+library(ModelMetrics)
+library(caret)
+
+cate_gpa <- read.csv("dei_survey_Final_v1.csv",na.strings = c(" ","","I donât know","0"))   
 #check NA in Each Column
 sapply(cate_gpa, function(y) sum(((is.na(y)))))
 #Delete row when cate_gpa$gpa is NA
@@ -48,7 +49,7 @@ cate_gpa_clear$transgender[is.na(cate_gpa_clear$transgender)] <- result_transgen
 
 #sexual_orientation
 result_sexual_orientation <- getmode(cate_gpa_clear$sexual_orientation)
-print(result_sexual_orientation) # NA   #是否改为 No_Response
+print(result_sexual_orientation) # NA   #willchange to No_Response
 cate_gpa_clear$sexual_orientation[is.na(cate_gpa_clear$sexual_orientation)] <- getmode(cate_gpa_clear$sexual_orientation)
 
 #religion
@@ -282,8 +283,8 @@ trainIndex <- createDataPartition(dei_cate_clear$gpa,
                                   p = .8,   
                                   list = FALSE,
                                   times = 1)
-dei_cateTraining <- dei_cate_clear[trainIndex[, 1], ]  #training 
-dei_cateTesting <- dei_cate_clear[-trainIndex[, 1], ]  #testing
+dei_cateTraining <- dei_cate_clear[trainIndex, ]  #training 
+dei_cateTesting <- dei_cate_clear[-trainIndex, ]  #testing
 
 class(dei_cateTraining)
 str(dei_cateTraining)
@@ -292,7 +293,7 @@ mtry <- c(9,15,69 )
 
 
 # for all
-model_all <- randomFores(log(gpa)~., data=dei_cateTraining,  mtry=sqrt(69), importance = TRUE)
+model_all <- randomForest(gpa~., data=dei_cateTraining,  mtry=sqrt(69), importance = TRUE)
 varImpPlot(model_all)
 yhat<-predict(model_all, dei_cateTesting, type='response')
 print(yhat)
@@ -300,9 +301,8 @@ yhat <- as.numeric(yhat)
 dei_cateTesting$gpa <- as.numeric(dei_cateTesting$gpa)
 a <- cbind(yhat,dei_cateTesting$gpa)
 write.csv(a,"a.csv")
-mean((yhat-dei_cateTesting$gpa)^2) 
-confusionMatrix(yhat,dei_cateTesting$gpa)
-
+mean(dei_cateTesting$gpa==yhat)     #Accuracy 38.74%
+# importance features: district/ book_read_number/dei_fair_
 
 #only cate and gpa
 only_cate_gpa <- dei_cate_clear[,1:16]
@@ -311,20 +311,18 @@ trainIndex <- createDataPartition(only_cate_gpa$gpa,
                                   p = .8,   
                                   list = FALSE,
                                   times = 1)
-only_cateTraining <- only_cate_gpa[trainIndex[, 1], ]  #training 
-only_cateTesting <- only_cate_gpa[-trainIndex[, 1], ]  #testing
+only_cateTraining <- only_cate_gpa[trainIndex, ]  #training 
+only_cateTesting <- only_cate_gpa[-trainIndex, ]  #testing
 model_cate <- randomForest(gpa~., data=only_cateTraining,  mtry=sqrt(15), importance = TRUE)
 varImpPlot(model_cate)
-yhat<-predict(model_cate, only_cateTesting, type='response')
-print(yhat)
+yhat1<-predict(model_cate, only_cateTesting, type='response')
+print(yhat1)
 yhat <- as.numeric(yhat)
 only_cateTesting$gpa <- as.numeric(only_cateTesting$gpa)
 mean((yhat-only_cateTesting$gpa)^2) 
 b <- cbind(yhat,only_cateTesting$gpa)
-
+mean(dei_cateTesting$gpa==yhat1)   # Accuracy 36.64%
 write.csv(b,"b.csv")
-mean((yhat-dei_cateTesting$gpa)^2) 
-
 
 
 # only G and gpa
@@ -335,18 +333,22 @@ trainIndex <- createDataPartition(only_G_gpa$gpa,
                                   p = .8,   
                                   list = FALSE,
                                   times = 1)
-only_GTraining <- only_G_gpa[trainIndex[, 1], ]  #training 
-only_GTesting <- only_G_gpa[-trainIndex[, 1], ]  #testing
+only_GTraining <- only_G_gpa[trainIndex, ]  #training 
+only_GTesting <- only_G_gpa[-trainIndex, ]  #testing
 model_G <- randomForest(gpa~., data=only_GTraining,  mtry=sqrt(9), importance = TRUE)
 varImpPlot(model_G)
-yhat<-predict(model_G, only_GTesting, type='response')
+yhat2<-predict(model_G, only_GTesting, type='response')
 print(yhat)
 yhat <- as.numeric(yhat)
 only_GTesting$gpa <- as.numeric(only_GTesting$gpa)
-mean((yhat-only_GTesting$gpa)^2) 
 c <- cbind(yhat,only_GTesting$gpa)
-
+mean(dei_cateTesting$gpa==yhat2)    #Accuracy 31.93%
 write.csv(c,"c.csv")
+
+
+
+
+
 
 
 
