@@ -302,7 +302,7 @@ dei_cateTesting$gpa <- as.numeric(dei_cateTesting$gpa)
 a <- cbind(yhat,dei_cateTesting$gpa)
 write.csv(a,"a.csv")
 mean(dei_cateTesting$gpa==yhat)     #Accuracy 38.74%
-# importance features: district/ book_read_number/dei_fair_
+# importance features: district/ book_read_number/dei_fair_to_boys/grade/learning_disability
 
 #only cate and gpa
 only_cate_gpa <- dei_cate_clear[,1:16]
@@ -323,7 +323,7 @@ mean((yhat-only_cateTesting$gpa)^2)
 b <- cbind(yhat,only_cateTesting$gpa)
 mean(dei_cateTesting$gpa==yhat1)   # Accuracy 36.64%
 write.csv(b,"b.csv")
-
+# importance features: learning_disability/ district/ book_read_number/guardian_degree/grade
 
 # only G and gpa
 
@@ -344,7 +344,7 @@ only_GTesting$gpa <- as.numeric(only_GTesting$gpa)
 c <- cbind(yhat,only_GTesting$gpa)
 mean(dei_cateTesting$gpa==yhat2)    #Accuracy 31.93%
 write.csv(c,"c.csv")
-
+# importance features: G_school_climate_overall/ G_outcome/G_school_climate for DEi/Everyday Discrimination by Students
 
 
 
