@@ -65,7 +65,7 @@ cate_gpa_clear$ethnicity[is.na(cate_gpa_clear$ethnicity)] <- result_ethnicity
 #physical_disability 
 result_physical_disability  <- getmode(cate_gpa_clear$physical_disability )
 print(result_physical_disability) # NA
-cate_gpa_clear$physical_disabilit[is.na(cate_gpa_clear$physical_disabilit)] <- result_physical_disability
+cate_gpa_clear$physical_disability[is.na(cate_gpa_clear$physical_disabilit)] <- result_physical_disability
 
 #learning_disability 
 result_learning_disability   <- getmode(cate_gpa_clear$learning_disability  )
@@ -292,7 +292,7 @@ str(dei_cateTraining)
 mtry <- c(9,15,69 )
 
 
-# for all
+# for all variables
 model_all <- randomForest(gpa~., data=dei_cateTraining,  mtry=sqrt(69), importance = TRUE)
 varImpPlot(model_all)
 yhat<-predict(model_all, dei_cateTesting, type='response')
@@ -304,7 +304,7 @@ write.csv(a,"a.csv")
 mean(dei_cateTesting$gpa==yhat)     #Accuracy 38.74%
 # importance features: district/ book_read_number/dei_fair_to_boys/grade/learning_disability
 
-#only cate and gpa
+#only categorical variables and gpa
 only_cate_gpa <- dei_cate_clear[,1:16]
 set.seed(2016)
 trainIndex <- createDataPartition(only_cate_gpa$gpa,  
@@ -313,6 +313,7 @@ trainIndex <- createDataPartition(only_cate_gpa$gpa,
                                   times = 1)
 only_cateTraining <- only_cate_gpa[trainIndex, ]  #training 
 only_cateTesting <- only_cate_gpa[-trainIndex, ]  #testing
+#only categorical variables and gpa
 model_cate <- randomForest(gpa~., data=only_cateTraining,  mtry=sqrt(15), importance = TRUE)
 varImpPlot(model_cate)
 yhat1<-predict(model_cate, only_cateTesting, type='response')
@@ -325,7 +326,7 @@ mean(dei_cateTesting$gpa==yhat1)   # Accuracy 36.64%
 write.csv(b,"b.csv")
 # importance features: learning_disability/ district/ book_read_number/guardian_degree/grade
 
-# only G and gpa
+# only G_variables and gpa
 
 only_G_gpa <- dei_cate_clear[,c(16,22,27,36,40,44,51,58,63,69)]
 set.seed(2016)
@@ -335,6 +336,7 @@ trainIndex <- createDataPartition(only_G_gpa$gpa,
                                   times = 1)
 only_GTraining <- only_G_gpa[trainIndex, ]  #training 
 only_GTesting <- only_G_gpa[-trainIndex, ]  #testing
+# only G_variables and gpa
 model_G <- randomForest(gpa~., data=only_GTraining,  mtry=sqrt(9), importance = TRUE)
 varImpPlot(model_G)
 yhat2<-predict(model_G, only_GTesting, type='response')
